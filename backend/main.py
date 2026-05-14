@@ -3,6 +3,7 @@ import cv2
 import threading
 import numpy as np
 from contextlib import asynccontextmanager
+from pathlib import Path
 from typing import Set
 
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
@@ -63,7 +64,8 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(lifespan=lifespan)
-app.mount("/static", StaticFiles(directory="../frontend"), name="static")
+_FRONTEND = Path(__file__).parent.parent / 'frontend'
+app.mount("/static", StaticFiles(directory=str(_FRONTEND)), name="static")
 
 
 async def _broadcast(data: dict):
@@ -97,7 +99,7 @@ async def _mjpeg_generator():
 
 @app.get("/", response_class=HTMLResponse)
 async def index():
-    with open('../frontend/index.html') as f:
+    with open(_FRONTEND / 'index.html') as f:
         return f.read()
 
 

@@ -16,10 +16,9 @@ def make_mock_jpeg():
 
 
 def test_frame_stream_yields_numpy_array():
-    """FrameStream should yield numpy arrays from MJPEG chunks."""
+    """FrameStream should yield numpy arrays from MJPEG stream via SOI/EOI marker extraction."""
     jpeg = make_mock_jpeg()
-    boundary = b'--frame\r\nContent-Type: image/jpeg\r\n\r\n'
-    mock_content = boundary + jpeg + b'\r\n'
+    mock_content = jpeg  # raw JPEG bytes — implementation finds SOI/EOI markers directly
 
     mock_resp = MagicMock()
     mock_resp.iter_content.return_value = [mock_content]

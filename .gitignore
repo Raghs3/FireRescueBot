@@ -14,5 +14,3 @@ esp32cam/esp32cam_stream/config.h
 .vscode/
 *.swp
 
-*.md
-!README.md

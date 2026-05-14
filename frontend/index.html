@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fire Rescue RC</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <header id="status-bar">
+    <span id="status-cam" class="status-badge">CAM: --</span>
+    <span id="status-bt"  class="status-badge">BT: --</span>
+    <span id="status-gpu" class="status-badge">MODE: --</span>
+    <span class="title">Fire Rescue RC</span>
+  </header>
+
+  <main>
+    <section id="video-panel">
+      <div id="video-wrapper">
+        <img id="feed" src="/video_feed" alt="Camera Feed">
+      </div>
+    </section>
+
+    <aside id="side-panel">
+      <h2>Alerts</h2>
+      <ul id="alert-log"></ul>
+    </aside>
+  </main>
+
+  <footer id="controls">
+    <div id="dpad">
+      <button data-cmd="F" title="Forward (W)">▲</button>
+      <div class="dpad-row">
+        <button data-cmd="L" title="Left (A)">◄</button>
+        <button data-cmd="S" title="Stop (Space)">■</button>
+        <button data-cmd="R" title="Right (D)">►</button>
+      </div>
+      <button data-cmd="B" title="Backward (S)">▼</button>
+    </div>
+    <p class="hint">WASD / Arrow keys also work. Release key to stop.</p>
+  </footer>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

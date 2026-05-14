@@ -1,0 +1,15 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+.env
+
+# Models (large binary weights)
+backend/models/*.pt
+
+# ESP32 WiFi credentials
+esp32cam/esp32cam_stream/config.h
+
+# IDE
+.vscode/
+*.swp

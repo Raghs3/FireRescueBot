@@ -17,17 +17,29 @@ class FrameStream:
 
     def _iter_esp32_frames(self):
         try:
-            with requests.get(self.url, stream=True, timeout=5) as resp:
+            with requests.get(self.url, stream=True, timeout=(10, 30)) as resp:
                 buf = b''
                 for chunk in resp.iter_content(chunk_size=4096):
                     buf += chunk
                     while True:
-                        start = buf.find(b'\xff\xd8')  # JPEG SOI
-                        end = buf.find(b'\xff\xd9')    # JPEG EOI
-                        if start == -1 or end == -1:
+                        # Find Content-Length header to read exact frame bytes
+                        cl_start = buf.find(b'Content-Length:')
+                        if cl_start == -1:
                             break
-                        jpeg = buf[start:end + 2]
-                        buf = buf[end + 2:]
+                        nl = buf.find(b'\r\n\r\n', cl_start)
+                        if nl == -1:
+                            break
+                        try:
+                            length = int(buf[cl_start + 15:nl].strip())
+                        except ValueError:
+                            buf = buf[cl_start + 15:]
+                            break
+                        frame_start = nl + 4
+                        frame_end = frame_start + length
+                        if len(buf) < frame_end:
+                            break  # wait for more chunks
+                        jpeg = buf[frame_start:frame_end]
+                        buf = buf[frame_end:]
                         arr = np.frombuffer(jpeg, dtype=np.uint8)
                         frame = cv2.imdecode(arr, cv2.IMREAD_COLOR)
                         if frame is not None:

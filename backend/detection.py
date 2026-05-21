@@ -136,17 +136,31 @@ class Detector:
         self.person_model.to(device)
 
         fire_model_path = MODELS_DIR / 'fire_model.pt'
+        self.fire_model = None
         if not fire_model_path.exists():
             print("[detection] Downloading fire detection model...")
-            downloaded = hf_hub_download(
-                repo_id='keremberke/yolov8n-fire-detection',
-                filename='best.pt'
-            )
-            import shutil
-            shutil.copy(downloaded, fire_model_path)
+            hf_token = os.getenv('HF_TOKEN') or None
+            _HF_REPOS = [
+                ('TommyNgx/YOLOv10-Fire-and-Smoke-Detection', 'best.pt'),
+                ('pyronear/yolov8s', 'model.pt'),
+                ('keremberke/yolov8n-fire-detection', 'best.pt'),
+            ]
+            downloaded = None
+            for repo_id, filename in _HF_REPOS:
+                try:
+                    downloaded = hf_hub_download(repo_id=repo_id, filename=filename, token=hf_token)
+                    break
+                except Exception as e:
+                    print(f"[detection] {repo_id} unavailable: {e}")
+            if downloaded:
+                import shutil
+                shutil.copy(downloaded, fire_model_path)
+            else:
+                print("[detection] WARNING: fire model unavailable — fire detection disabled")
 
-        self.fire_model = YOLO(str(fire_model_path))
-        self.fire_model.to(device)
+        if fire_model_path.exists():
+            self.fire_model = YOLO(str(fire_model_path))
+            self.fire_model.to(device)
         self.device = device
 
     def process(self, frame: np.ndarray):
@@ -158,10 +172,11 @@ class Detector:
             x1, y1, x2, y2 = map(int, box.xyxy[0])
             detections.append(Detection('person', x1, y1, x2, y2, float(box.conf[0])))
 
-        fire_results = self.fire_model(frame, verbose=False)[0]
-        for box in fire_results.boxes:
-            x1, y1, x2, y2 = map(int, box.xyxy[0])
-            detections.append(Detection('fire', x1, y1, x2, y2, float(box.conf[0])))
+        if self.fire_model is not None:
+            fire_results = self.fire_model(frame, verbose=False)[0]
+            for box in fire_results.boxes:
+                x1, y1, x2, y2 = map(int, box.xyxy[0])
+                detections.append(Detection('fire', x1, y1, x2, y2, float(box.conf[0])))
 
         alerts = classify_alerts(detections, w, h)
         annotated = _draw_boxes(frame, detections, alerts)

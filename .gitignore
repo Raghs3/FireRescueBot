@@ -4,8 +4,9 @@ __pycache__/
 *.pyc
 .env
 
-# Models (large binary weights)
+# Models (large binary weights — auto-downloaded on first run)
 backend/models/*.pt
+backend/*.pt
 
 # ESP32 WiFi credentials
 esp32cam/esp32cam_stream/config.h

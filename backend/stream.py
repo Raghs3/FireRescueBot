@@ -58,13 +58,15 @@ class FrameStream:
             cap.release()
 
     def frames(self):
+        rotate_esp32 = os.getenv('ROTATE_ESP32', 'false').lower() == 'true'
+        rotate_webcam = os.getenv('ROTATE_WEBCAM', 'false').lower() == 'true'
         while True:
             for frame in self._iter_esp32_frames():
-                yield frame
+                yield cv2.rotate(frame, cv2.ROTATE_180) if rotate_esp32 else frame
             if self.webcam_fallback:
                 print("[stream] Falling back to webcam")
                 for frame in self._iter_webcam_frames():
-                    yield frame
+                    yield cv2.rotate(frame, cv2.ROTATE_180) if rotate_webcam else frame
                 return
             print("[stream] Retrying ESP32 in 2s...")
             time.sleep(2)
